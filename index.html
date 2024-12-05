@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #1a1a1a;
+            font-family: "Microsoft JhengHei", sans-serif;
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container { 
+            max-width: 1200px; 
+            width: 100%; 
+            margin: auto; 
+        }
+
+        .base-window {
+            background: rgba(14, 42, 63, 0.95);
+            border: 1px solid #ffffff;
+            border-radius: 3px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            background: #1c4565;
+            padding: 10px;
+            border: 1px solid #436279;
+            border-radius: 3px;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: clamp(16px, 2vw, 24px);
+            font-weight: 700;
+            text-shadow: 0 0 5px #4a9eff;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #436279;
+            color: #fff;
+            padding: 10px;
+            border-radius: 3px;
+            font-family: inherit;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #436279;
+            color: #fff;
+            padding: 10px;
+            border-radius: 3px;
+            margin-bottom: 10px;
+        }
+
+        .item {
+            background: rgba(67, 98, 121, 0.3);
+            border: 1px solid #436279;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .item:hover {
+            background: rgba(74, 158, 255, 0.1);
+            border-color: #4a9eff;
+        }
+
+        .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .scroll-area {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scroll-area::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: #436279;
+            border-radius: 3px;
+        }
+
+        button {
+            background: rgba(74, 158, 255, 0.2);
+            border: 1px solid #436279;
+            color: #4a9eff;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: rgba(74, 158, 255, 0.3);
+            border-color: #4a9eff;
+            text-shadow: 0 0 5px #4a9eff;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        #stats {
+            color: #8aabcb;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(74, 158, 255, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 3px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .notes-area {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #436279;
+            border-radius: 3px;
+            padding: 10px;
+            min-height: 200px;
+        }
+
+        .note-item {
+            background: rgba(67, 98, 121, 0.3);
+            border: 1px solid #436279;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .note-item:hover {
+            background: rgba(74, 158, 255, 0.1);
+            border-color: #4a9eff;
+        }
+
+        .note-quantity {
+            width: 60px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #436279;
+            color: #fff;
+            text-align: center;
+            border-radius: 3px;
+            margin: 0 10px;
+        }
+
+        .note-quantity:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+
+        .remove-btn {
+            color: #ff4a4a;
+            margin-left: 5px;
+        }
+
+        .remove-btn:hover {
+            border-color: #ff4a4a;
+            text-shadow: 0 0 5px #ff4a4a;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="base-window">
+            <div class="header">道具加入工具</div>
+            <div class="grid">
+                <div class="base-window">
+                    <div class="header">貼上瑪奇當期機率表</div>
+                    <textarea id="input" placeholder="請貼上機率表..."></textarea>
+                    <div id="stats"></div>
+                    <input type="text" id="search" placeholder="搜尋道具名稱...">
+                    <div id="itemList" class="scroll-area"></div>
+                </div>
+
+                <div class="base-window">
+                    <div class="header">
+                        記事本
+                        <div class="btn-group">
+                            <button id="copyBtn" class="copy-btn" style="display:none">複製</button>
+                            <button id="clearBtn" class="clear-btn" style="display:none">清除</button>
+                        </div>
+                    </div>
+                    <div id="notesList" class="notes-area scroll-area"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">已複製到剪貼簿</div>
+
+    <script>
+        let items = [];
+        let notes = [];
+
+        document.getElementById('input').addEventListener('input', e => analyzeProbability(e.target.value));
+        document.getElementById('search').addEventListener('input', e => {
+            const term = e.target.value.toLowerCase();
+            updateItemList(items.filter(item => item.name.toLowerCase().includes(term)));
+        });
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            if(confirm('確定要清除所有記錄嗎？')) {
+                notes = [];
+                updateNotesList();
+            }
+        });
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            const content = notes.map(note => `${note.name} × ${note.quantity}`).join('\n');
+            navigator.clipboard.writeText(content).then(() => {
+                const toast = document.getElementById('toast');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            });
+        });
+
+        function analyzeProbability(text) {
+            try {
+                const stats = {
+                    total: 0,
+                    grades: new Map(),
+                    items: 0,
+                    itemList: []
+                };
+
+                const sabcRegex = /([SABC])\s*等級([^%]+?)(\d+\.\d+)%/g;
+                let match;
+                let hasMatch = false;
+
+                while ((match = sabcRegex.exec(text)) !== null) {
+                    hasMatch = true;
+                    const [, grade, name, prob] = match;
+                    const probability = parseFloat(prob);
+                    
+                    stats.total += probability;
+                    stats.items++;
+                    stats.grades.set(grade, (stats.grades.get(grade) || 0) + probability);
+                    stats.itemList.push({ grade, name: name.trim(), probability });
+                }
+
+                if (!hasMatch) {
+                    const regex = /(.+?)(\d+\.\d+)%/g;
+                    while ((match = regex.exec(text)) !== null) {
+                        const [, name, prob] = match;
+                        const probability = parseFloat(prob);
+                        
+                        stats.total += probability;
+                        stats.items++;
+                        stats.grades.set('一般', (stats.grades.get('一般') || 0) + probability);
+                        stats.itemList.push({ grade: '一般', name: name.trim(), probability });
+                    }
+                }
+
+                items = stats.itemList;
+                updateStats(stats);
+                updateItemList(items);
+            } catch (error) {
+                console.error('分析錯誤:', error);
+            }
+        }
+
+        function updateStats(stats) {
+            document.getElementById('stats').textContent = 
+                `已載入 ${stats.items} 個項目，總機率: ${stats.total.toFixed(2)}%`;
+        }
+
+        function updateItemList(items) {
+            document.getElementById('itemList').innerHTML = items.map(item => `
+                <div class="item">
+                    <div class="item-info">
+                        <span style="color: #fff">${item.name}</span>
+                        ${item.grade !== '一般' ? 
+                            `<span style="color:#8aabcb;font-size:0.9rem"> ${item.grade}等級</span>` : ''}
+                        <div style="color:#4a9eff;font-size:0.9rem">
+                            ${item.probability.toFixed(3)}%
+                        </div>
+                    </div>
+                    <button onclick="addToNotes(${JSON.stringify(item).replace(/"/g, '&quot;')})">+</button>
+                </div>
+            `).join('') || '<div style="text-align:center;color:#8aabcb;padding:20px">找不到符合的道具</div>';
+        }
+
+        function updateNotesList() {
+            const sortedNotes = [...notes].sort((a, b) => {
+                const gradeOrder = { 'S': 1, 'A': 2, 'B': 3, 'C': 4, '一般': 5 };
+                return (gradeOrder[a.grade] || 6) - (gradeOrder[b.grade] || 6) || 
+                       b.probability - a.probability;
+            });
+
+            const html = sortedNotes.length ? 
+                sortedNotes.map(note => `
+                    <div class="note-item">
+                        <div class="item-info">
+                            <span style="color: #fff">${note.name}</span>
+                            ${note.grade !== '一般' ? 
+                                `<span style="color:#8aabcb;font-size:0.9rem"> ${note.grade}等級</span>` : ''}
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            ×
+                            <input 
+                                type="number" 
+                                class="note-quantity" 
+                                value="${note.quantity}" 
+                                min="1"
+                                onchange="updateQuantity(${note.id}, this.value)"
+                            >
+                            <button class="remove-btn" onclick="removeNote(${note.id})">×</button>
+                        </div>
+                    </div>
+                `).join('') : 
+                '<div style="text-align:center;color:#8aabcb;padding:20px">點擊道具旁的 + 按鈕加入記事本</div>';
+
+            document.getElementById('notesList').innerHTML = html;
+
+            const hasNotes = notes.length > 0;
+            document.getElementById('copyBtn').style.display = hasNotes ? 'inline-block' : 'none';
+            document.getElementById('clearBtn').style.display = hasNotes ? 'inline-block' : 'none';
+        }
+
+        function addToNotes(item) {
+            if(notes.some(note => note.name === item.name)) {
+                alert('此道具已在記事本中');
+                return;
+            }
+            notes.push({...item, quantity: 1, id: Date.now()});
+            updateNotesList();
+        }
+
+        function updateQuantity(id, value) {
+            const note = notes.find(n => n.id === id);
+            if(note) {
+                note.quantity = Math.max(1, parseInt(value) || 1);
+                updateNotesList();
+            }
+        }
+
+        function removeNote(id) {
+            notes = notes.filter(note => note.id !== id);
+            updateNotesList();
+        }
+    </script>
+</body>
+</html>
