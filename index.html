@@ -24,7 +24,7 @@
 
         .base-window {
             background: rgba(14, 42, 63, 0.95);
-            border: 1px solid #ffffff;
+            border: 1px solid #436279;
             border-radius: 3px;
             padding: 15px;
             margin-bottom: 20px;
@@ -219,10 +219,10 @@
 <body>
     <div class="container">
         <div class="base-window">
-            <div class="header">道具加入工具</div>
+            <div class="header">無論是要販售、贈與整理自己的清單不用再手忙腳亂地一個個打字了</div>
             <div class="grid">
                 <div class="base-window">
-                    <div class="header">貼上瑪奇當期機率表</div>
+                    <div class="header">貼上機率表</div>
                     <textarea id="input" placeholder="請貼上機率表..."></textarea>
                     <div id="stats"></div>
                     <input type="text" id="search" placeholder="搜尋道具名稱...">
@@ -261,7 +261,13 @@
             }
         });
         document.getElementById('copyBtn').addEventListener('click', () => {
-            const content = notes.map(note => `${note.name} × ${note.quantity}`).join('\n');
+            const content = [...notes].sort((a, b) => {
+                const lengthDiff = a.name.length - b.name.length;
+                if (lengthDiff !== 0) return lengthDiff;
+                const gradeOrder = { 'S': 1, 'A': 2, 'B': 3, 'C': 4, '一般': 5 };
+                return (gradeOrder[a.grade] || 6) - (gradeOrder[b.grade] || 6);
+            }).map(note => `${note.name} × ${note.quantity}`).join('\n');
+            
             navigator.clipboard.writeText(content).then(() => {
                 const toast = document.getElementById('toast');
                 toast.classList.add('show');
@@ -337,9 +343,13 @@
 
         function updateNotesList() {
             const sortedNotes = [...notes].sort((a, b) => {
+                // 主要排序：按名稱長度
+                const lengthDiff = a.name.length - b.name.length;
+                if (lengthDiff !== 0) return lengthDiff;
+
+                // 次要排序：等級
                 const gradeOrder = { 'S': 1, 'A': 2, 'B': 3, 'C': 4, '一般': 5 };
-                return (gradeOrder[a.grade] || 6) - (gradeOrder[b.grade] || 6) || 
-                       b.probability - a.probability;
+                return (gradeOrder[a.grade] || 6) - (gradeOrder[b.grade] || 6);
             });
 
             const html = sortedNotes.length ? 
